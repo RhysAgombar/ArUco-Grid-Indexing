@@ -1,3 +1,4 @@
 ﻿  Source.cpp
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(93): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
   ArUco-Grid-Indexing.vcxproj -> D:\Programming Projects\C++\ArUco-Grid-Indexing\ArUco-Grid-Indexing\x64\Debug\ArUco-Grid-Indexing.exe
   ArUco-Grid-Indexing.vcxproj -> D:\Programming Projects\C++\ArUco-Grid-Indexing\ArUco-Grid-Indexing\x64\Debug\ArUco-Grid-Indexing.pdb (Full PDB)
