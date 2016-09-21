@@ -108,13 +108,26 @@ vector<cv::Point2f> findCorners(vector<vector<cv::Point2f>> corners, vector<int>
   return gridCorners;
 }
 
-//cv::Point findIntersection(cv::Point h1, cv::Point h2, cv::Point v1, cv::Point v2) {
-//
-//  float hSlope, vSlope, hInt, vInt;
-//
-//  hSlope =  (h2.y - h1.y) / (float) (h2.x - h1.x);
-//
-//}
+cv::Point findIntersection(cv::Point h1, cv::Point h2, cv::Point v1, cv::Point v2) {
+
+  // add cases for horiz/vert lines.
+
+  float hSlope, vSlope, hInt, vInt;
+  cv::Point intersection;
+
+  hSlope = (h2.y - h1.y) /(float) (h2.x - h1.x);
+  hInt = h1.y - hSlope * h1.x;
+
+  vSlope = (v2.y - v1.y) /(float) (v2.x - v1.x);
+  vInt = v1.y - vSlope * v1.x;
+  
+
+  intersection.x = (vInt - hInt) /(float) (hSlope - vSlope);
+  intersection.y = hSlope * intersection.x + hInt;
+
+  return intersection;
+
+}
 
 void drawGrid(cv::Mat imageCopy, vector<cv::Point2f> gridCorners, int horiz, int vert) {
   cv::Mat dirVec[4]; // top left -> top right, bottom left -> bottom right, top left -> bottom left, top right -> bottom right
@@ -140,7 +153,7 @@ void drawGrid(cv::Mat imageCopy, vector<cv::Point2f> gridCorners, int horiz, int
     vLines[i] = new cv::Point[2];
   }    
 
-  horiz = horiz - 1;
+  horiz = horiz - 1; 
   vert = vert - 1;
 
   //dirVec[0] = (cv::Mat_<float>(1, 2) << gridCorners.at(1).x - gridCorners.at(0).x, gridCorners.at(1).y - gridCorners.at(0).y);
@@ -216,6 +229,12 @@ void drawGrid(cv::Mat imageCopy, vector<cv::Point2f> gridCorners, int horiz, int
     cv::line(imageCopy, vLines[i][0], vLines[i][1], cv::Scalar(255, 255, 255));
   }
 
+  for (int i = 0; i <= horiz; i++) {
+    for (int j = 0; j <= vert; j++) {
+      cv::circle(imageCopy, findIntersection(hLines[i][0], hLines[i][1], vLines[j][0], vLines[j][1]), 2, cv::Scalar(0, 0, 255));
+    }
+  }
+
 }
 
 int main(int, char** argv)
@@ -225,7 +244,7 @@ int main(int, char** argv)
 
   cv::Mat image, imageCopy;
 
-  string imageName("../Images/ArUcoGridLarge3x3.png"); // by default
+  string imageName("../Images/ArUcoGridLarge3x3rot.png"); // by default
   image = cv::imread(imageName.c_str(), cv::IMREAD_COLOR); // Read the file
 
   int dictionaryId = 10; // alias for the DICT_6X6_250 dictionary

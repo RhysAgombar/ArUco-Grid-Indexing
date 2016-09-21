@@ -5,12 +5,14 @@ d:\programming\opencv-3.0\build\install\include\opencv2\core\utility.hpp : warni
 d:\programming\opencv-3.0\build\install\include\opencv2\core\utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (932). Save the file in Unicode format to prevent data loss
 d:\programming\opencv-3.0\build\install\include\opencv2\imgproc.hpp(618): warning C4819: The file contains a character that cannot be represented in the current code page (932). Save the file in Unicode format to prevent data loss
 d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(98): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(181): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(189): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(203): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(208): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(121): warning C4101: 'vDist': unreferenced local variable
-d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(121): warning C4101: 'hDist': unreferenced local variable
-d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(121): warning C4101: 'dist': unreferenced local variable
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(123): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(124): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(192): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(200): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(214): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(219): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(132): warning C4101: 'vDist': unreferenced local variable
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(132): warning C4101: 'hDist': unreferenced local variable
+d:\programming projects\c++\aruco-grid-indexing\aruco-grid-indexing\aruco-grid-indexing\source.cpp(132): warning C4101: 'dist': unreferenced local variable
   ArUco-Grid-Indexing.vcxproj -> D:\Programming Projects\C++\ArUco-Grid-Indexing\ArUco-Grid-Indexing\x64\Debug\ArUco-Grid-Indexing.exe
   ArUco-Grid-Indexing.vcxproj -> D:\Programming Projects\C++\ArUco-Grid-Indexing\ArUco-Grid-Indexing\x64\Debug\ArUco-Grid-Indexing.pdb (Full PDB)
