@@ -4,9 +4,15 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 
 //using namespace cv;
 using namespace std;
+
+class gridSquare {
+public:
+  float corner[4];
+};
 
 /// Global variables
 cv::Mat src, erosion_dst, dilation_dst;
@@ -20,6 +26,9 @@ int const max_kernel_size = 21;
 
 cv::Point2f test;
 
+gridSquare** grid;
+
+
 void genMarkers() {
   cv::Mat markerImage1, markerImage2, markerImage3, markerImage4;
   cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
@@ -30,10 +39,10 @@ void genMarkers() {
   dictionary.drawMarker(2, 200, markerImage3, 1);
   dictionary.drawMarker(3, 200, markerImage4, 1);
 
-  imshow("marker1", markerImage1);
-  imshow("marker2", markerImage2);
-  imshow("marker3", markerImage3);
-  imshow("marker4", markerImage4);
+  imshow("Top Left Marker", markerImage1);
+  imshow("Top Right Marker", markerImage2);
+  imshow("Bottom Right Marker", markerImage3);
+  imshow("Bottom Left Marker", markerImage4);
 
   cv::waitKey(0);
 }
@@ -65,7 +74,7 @@ static bool readDetectorParameters(string filename, cv::Ptr<cv::aruco::DetectorP
   return true;
 }
 
-vector<cv::Point2f> findCorners(vector<vector<cv::Point2f>> corners) {
+vector<cv::Point2f> findCorners(vector<vector<cv::Point2f>> corners, vector<int> ids) {
   
   cv::Point2f midPoint;
   midPoint.x = 0;
@@ -81,10 +90,6 @@ vector<cv::Point2f> findCorners(vector<vector<cv::Point2f>> corners) {
   midPoint.x = midPoint.x / (corners.size() * 4);
   midPoint.y = midPoint.y / (corners.size() * 4);
 
-  //test = midPoint;
-
- 
-
   vector<cv::Point2f> gridCorners(4);
 
   for (int i = 0; i < corners.size(); i++) {
@@ -94,7 +99,7 @@ vector<cv::Point2f> findCorners(vector<vector<cv::Point2f>> corners) {
 
       if (dist < pDist) {
         pDist = dist;
-        gridCorners.at(i) = corners.at(i).at(j);
+        gridCorners.at(ids.at(i)) = corners.at(i).at(j);
       }
       
     }
@@ -103,7 +108,113 @@ vector<cv::Point2f> findCorners(vector<vector<cv::Point2f>> corners) {
   return gridCorners;
 }
 
+//cv::Point findIntersection(cv::Point h1, cv::Point h2, cv::Point v1, cv::Point v2) {
+//
+//  float hSlope, vSlope, hInt, vInt;
+//
+//  hSlope =  (h2.y - h1.y) / (float) (h2.x - h1.x);
+//
+//}
+
 void drawGrid(cv::Mat imageCopy, vector<cv::Point2f> gridCorners, int horiz, int vert) {
+  cv::Mat dirVec[4]; // top left -> top right, bottom left -> bottom right, top left -> bottom left, top right -> bottom right
+  float hDist, vDist, dist;
+
+  vert = vert + 1;
+  horiz = horiz + 1;
+
+  grid = new gridSquare*[vert];
+  for (int i = 0; i < vert; i++) {
+    grid[i] = new gridSquare[horiz];
+  }    
+
+  cv::Point **hLines;
+  hLines = new cv::Point*[vert];
+  for (int i = 0; i < vert; i++) {
+    hLines[i] = new cv::Point[2];
+  }    
+
+  cv::Point **vLines;
+  vLines = new cv::Point*[horiz];
+  for (int i = 0; i < horiz; i++) {
+    vLines[i] = new cv::Point[2];
+  }    
+
+  horiz = horiz - 1;
+  vert = vert - 1;
+
+  //dirVec[0] = (cv::Mat_<float>(1, 2) << gridCorners.at(1).x - gridCorners.at(0).x, gridCorners.at(1).y - gridCorners.at(0).y);
+  ////dist = sqrt(pow(dirVec[0].at<double>(0, 0), 2) + pow(dirVec[0].at<double>(0, 1), 2));
+  //dirVec[0] = (cv::Mat_<float>(1, 2) << dirVec[0].at<float>(0, 0) / horiz, dirVec[0].at<float>(0, 1) / vert);
+
+  //dirVec[1] = (cv::Mat_<float>(1, 2) << gridCorners.at(2).x - gridCorners.at(3).x, gridCorners.at(2).y - gridCorners.at(3).y);
+  ////dist = sqrt(pow(dirVec[1].at<double>(0, 0), 2) + pow(dirVec[1].at<double>(0, 1), 2));
+  //dirVec[1] = (cv::Mat_<float>(1, 2) << dirVec[1].at<float>(0, 0) / horiz, dirVec[1].at<float>(0, 1) / vert);
+
+  //dirVec[2] = (cv::Mat_<float>(1, 2) << gridCorners.at(3).x - gridCorners.at(0).x, gridCorners.at(3).y - gridCorners.at(0).y);
+  //dist = sqrt(pow(dirVec[2].at<float>(0, 0), 2) + pow(dirVec[2].at<float>(0, 1), 2));
+  //dirVec[2] = (cv::Mat_<float>(1, 2) << (dirVec[2].at<float>(0, 0) / dist) * (horiz - 1), (dirVec[2].at<float>(0, 1) / dist) * (vert - 1));
+
+  //dirVec[3] = (cv::Mat_<float>(1, 2) << gridCorners.at(2).x - gridCorners.at(1).x, gridCorners.at(2).y - gridCorners.at(1).y);
+  //dist = sqrt(pow(dirVec[3].at<float>(0, 0), 2) + pow(dirVec[3].at<float>(0, 1), 2));
+  //dirVec[3] = (cv::Mat_<float>(1, 2) << dirVec[3].at<float>(0, 0) / dist, dirVec[3].at<float>(0, 1) / dist);
+
+
+  //for (int i = 0; i <= horiz; i++) {
+  //  //hLines[i][0] = gridCorners.at(0).x + (-1) * 
+  //  //cv::circle(imageCopy, cv::Point(gridCorners.at(0).x + (dirVec[0].at<float>(0, 0) * i), gridCorners.at(0).y + dirVec[0].at<float>(0, 1) * i), 2, cv::Scalar(0, 0, 255));
+  //  //cv::circle(imageCopy, cv::Point(gridCorners.at(3).x + (dirVec[1].at<float>(0, 0) * i), gridCorners.at(3).y + dirVec[1].at<float>(0, 1) * i), 2, cv::Scalar(0, 0, 255));
+  //}
+
+  for (int i = 0; i <= vert; i++) {
+
+    float x = 0;
+    float y = 0;
+
+    float distx;
+    float disty;
+
+    distx = gridCorners.at(3).x - gridCorners.at(0).x;
+    disty = gridCorners.at(3).y - gridCorners.at(0).y;
+
+
+    hLines[i][0] = cv::Point(gridCorners.at(0).x + (distx * (i / (float)vert)), gridCorners.at(0).y + (disty) * (float)(i / (float)vert));
+
+    //cv::circle(imageCopy, cv::Point(gridCorners.at(0).x + (distx * (i/(float) vert)), gridCorners.at(0).y + (disty) * (float)(i/(float) vert)), 2, cv::Scalar(0, 0, 255));
+
+    distx = gridCorners.at(2).x - gridCorners.at(1).x;
+    disty = gridCorners.at(2).y - gridCorners.at(1).y;
+
+
+    hLines[i][1] = cv::Point(gridCorners.at(1).x + (distx * (i / (float)vert)), gridCorners.at(1).y + (disty) * (float)(i / (float)vert));
+  }
+
+  for (int i = 0; i <= horiz; i++) {
+
+    float x = 0;
+    float y = 0;
+
+    float distx;
+    float disty;
+
+    distx = gridCorners.at(1).x - gridCorners.at(0).x;
+    disty = gridCorners.at(1).y - gridCorners.at(0).y;
+
+    vLines[i][0] = cv::Point(gridCorners.at(0).x + (distx * (i / (float)horiz)), gridCorners.at(0).y + (disty) * (float)(i / (float)horiz));
+
+    distx = gridCorners.at(2).x - gridCorners.at(3).x;
+    disty = gridCorners.at(2).y - gridCorners.at(3).y;
+
+    vLines[i][1] = cv::Point(gridCorners.at(3).x + (distx * (i / (float)horiz)), gridCorners.at(3).y + (disty) * (float)(i / (float)horiz));
+  }
+
+  for (int i = 0; i <= vert; i++) {
+    cv::line(imageCopy, hLines[i][0], hLines[i][1], cv::Scalar(255, 255, 255));
+  }
+
+  for (int i = 0; i <= horiz; i++) {
+    cv::line(imageCopy, vLines[i][0], vLines[i][1], cv::Scalar(255, 255, 255));
+  }
 
 }
 
@@ -114,7 +225,7 @@ int main(int, char** argv)
 
   cv::Mat image, imageCopy;
 
-  string imageName("../Images/ArUcoGridLarge.png"); // by default
+  string imageName("../Images/ArUcoGridLarge3x3.png"); // by default
   image = cv::imread(imageName.c_str(), cv::IMREAD_COLOR); // Read the file
 
   int dictionaryId = 10; // alias for the DICT_6X6_250 dictionary
@@ -135,13 +246,20 @@ int main(int, char** argv)
     cv::aruco::drawDetectedMarkers(imageCopy, corners, ids);
   }
 
-  vector<cv::Point2f> gridCorners = findCorners(corners);
+  vector<cv::Point2f> gridCorners = findCorners(corners, ids);
 
+  // All rectangular object corners are organized in arrays, with the numbers going clockwise. eg: at(0) is the top left corner, at(1) is the top right, at(2) is the bottom right, at(3) is bottom left
+  // This follows the convention that ArUco uses.
   cv::circle(imageCopy, gridCorners.at(0), 10, cv::Scalar(255, 255, 255), CV_FILLED, 8, 0);
   cv::circle(imageCopy, gridCorners.at(1), 10, cv::Scalar(255, 255, 255), CV_FILLED, 8, 0);
   cv::circle(imageCopy, gridCorners.at(2), 10, cv::Scalar(255, 255, 255), CV_FILLED, 8, 0);
   cv::circle(imageCopy, gridCorners.at(3), 10, cv::Scalar(255, 255, 255), CV_FILLED, 8, 0);
   
+  int horiz = 3;//21;
+    int vert = 3;//30;
+
+  drawGrid(imageCopy, gridCorners, horiz, vert);
+
 
   cv::imshow("test", imageCopy);
 
