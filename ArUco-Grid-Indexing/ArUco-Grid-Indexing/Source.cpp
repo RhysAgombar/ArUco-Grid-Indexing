@@ -11,7 +11,9 @@ using namespace std;
 
 class gridSquare {
 public:
-  float corner[4];
+  cv::Point corner[4];
+  // add 'contains' method for finding location
+  // add  shading functions
 };
 
 /// Global variables
@@ -31,7 +33,7 @@ gridSquare** grid;
 
 void genMarkers() {
   cv::Mat markerImage1, markerImage2, markerImage3, markerImage4;
-  cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_6X6_250);
+  cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_100);
   //cv::aruco::drawMarker(dictionary, 23, 200, markerImage, 1);
 
   dictionary.drawMarker(0, 200, markerImage1, 1);
@@ -110,9 +112,9 @@ vector<cv::Point2f> findCorners(vector<vector<cv::Point2f>> corners, vector<int>
 
 cv::Point findIntersection(cv::Point h1, cv::Point h2, cv::Point v1, cv::Point v2) {
 
-  // add cases for horiz/vert lines.
-
   float hSlope, vSlope, hInt, vInt;
+  float eps = 1e-6;
+
   cv::Point intersection;
 
   hSlope = (h2.y - h1.y) /(float) (h2.x - h1.x);
@@ -122,8 +124,27 @@ cv::Point findIntersection(cv::Point h1, cv::Point h2, cv::Point v1, cv::Point v
   vInt = v1.y - vSlope * v1.x;
   
 
-  intersection.x = (vInt - hInt) /(float) (hSlope - vSlope);
-  intersection.y = hSlope * intersection.x + hInt;
+  if (hSlope < eps) {
+    intersection.y = h1.y;
+  }
+  else if (isinf(hSlope)) {
+    intersection.x = h1.x;
+  }
+  else {
+    intersection.y = hSlope * intersection.x + hInt;
+  }
+
+
+  if (vSlope < eps) {
+    intersection.y = v1.y;
+  }
+  else if (isinf(vSlope)) {
+    intersection.x = v1.x;
+  }
+  else {
+    intersection.x = (vInt - hInt) / (float)(hSlope - vSlope);
+  }
+
 
   return intersection;
 
@@ -155,29 +176,6 @@ void drawGrid(cv::Mat imageCopy, vector<cv::Point2f> gridCorners, int horiz, int
 
   horiz = horiz - 1; 
   vert = vert - 1;
-
-  //dirVec[0] = (cv::Mat_<float>(1, 2) << gridCorners.at(1).x - gridCorners.at(0).x, gridCorners.at(1).y - gridCorners.at(0).y);
-  ////dist = sqrt(pow(dirVec[0].at<double>(0, 0), 2) + pow(dirVec[0].at<double>(0, 1), 2));
-  //dirVec[0] = (cv::Mat_<float>(1, 2) << dirVec[0].at<float>(0, 0) / horiz, dirVec[0].at<float>(0, 1) / vert);
-
-  //dirVec[1] = (cv::Mat_<float>(1, 2) << gridCorners.at(2).x - gridCorners.at(3).x, gridCorners.at(2).y - gridCorners.at(3).y);
-  ////dist = sqrt(pow(dirVec[1].at<double>(0, 0), 2) + pow(dirVec[1].at<double>(0, 1), 2));
-  //dirVec[1] = (cv::Mat_<float>(1, 2) << dirVec[1].at<float>(0, 0) / horiz, dirVec[1].at<float>(0, 1) / vert);
-
-  //dirVec[2] = (cv::Mat_<float>(1, 2) << gridCorners.at(3).x - gridCorners.at(0).x, gridCorners.at(3).y - gridCorners.at(0).y);
-  //dist = sqrt(pow(dirVec[2].at<float>(0, 0), 2) + pow(dirVec[2].at<float>(0, 1), 2));
-  //dirVec[2] = (cv::Mat_<float>(1, 2) << (dirVec[2].at<float>(0, 0) / dist) * (horiz - 1), (dirVec[2].at<float>(0, 1) / dist) * (vert - 1));
-
-  //dirVec[3] = (cv::Mat_<float>(1, 2) << gridCorners.at(2).x - gridCorners.at(1).x, gridCorners.at(2).y - gridCorners.at(1).y);
-  //dist = sqrt(pow(dirVec[3].at<float>(0, 0), 2) + pow(dirVec[3].at<float>(0, 1), 2));
-  //dirVec[3] = (cv::Mat_<float>(1, 2) << dirVec[3].at<float>(0, 0) / dist, dirVec[3].at<float>(0, 1) / dist);
-
-
-  //for (int i = 0; i <= horiz; i++) {
-  //  //hLines[i][0] = gridCorners.at(0).x + (-1) * 
-  //  //cv::circle(imageCopy, cv::Point(gridCorners.at(0).x + (dirVec[0].at<float>(0, 0) * i), gridCorners.at(0).y + dirVec[0].at<float>(0, 1) * i), 2, cv::Scalar(0, 0, 255));
-  //  //cv::circle(imageCopy, cv::Point(gridCorners.at(3).x + (dirVec[1].at<float>(0, 0) * i), gridCorners.at(3).y + dirVec[1].at<float>(0, 1) * i), 2, cv::Scalar(0, 0, 255));
-  //}
 
   for (int i = 0; i <= vert; i++) {
 
@@ -229,22 +227,39 @@ void drawGrid(cv::Mat imageCopy, vector<cv::Point2f> gridCorners, int horiz, int
     cv::line(imageCopy, vLines[i][0], vLines[i][1], cv::Scalar(255, 255, 255));
   }
 
-  for (int i = 0; i <= horiz; i++) {
-    for (int j = 0; j <= vert; j++) {
-      cv::circle(imageCopy, findIntersection(hLines[i][0], hLines[i][1], vLines[j][0], vLines[j][1]), 2, cv::Scalar(0, 0, 255));
+
+  for (int i = 0; i < vert; i++) {
+    for (int j = 0; j < horiz; j++) {
+      grid[j][i].corner[0] = findIntersection(hLines[i][0], hLines[i][1], vLines[j][0], vLines[j][1]);
+      grid[j][i].corner[1] = findIntersection(hLines[i][0], hLines[i][1], vLines[j+1][0], vLines[j+1][1]);
+      grid[j][i].corner[2] = findIntersection(hLines[i+1][0], hLines[i+1][1], vLines[j+1][0], vLines[j+1][1]);
+      grid[j][i].corner[3] = findIntersection(hLines[i+1][0], hLines[i+1][1], vLines[j][0], vLines[j][1]);
     }
   }
+
+
+  //cv::circle(imageCopy, grid[2][2].corner[0], 2, cv::Scalar(0, 0, 255));
+  //cv::circle(imageCopy, grid[2][2].corner[1], 2, cv::Scalar(0, 0, 255));
+  //cv::circle(imageCopy, grid[2][2].corner[2], 2, cv::Scalar(0, 0, 255));
+  //cv::circle(imageCopy, grid[2][2].corner[3], 2, cv::Scalar(0, 0, 255));
+
+
+  //for (int i = 0; i <= horiz; i++) {
+  //  for (int j = 0; j <= vert; j++) {
+
+  //    cv::circle(imageCopy, findIntersection(hLines[i][0], hLines[i][1], vLines[j][0], vLines[j][1]), 2, cv::Scalar(0, 0, 255));
+  //  }
+  //}
 
 }
 
 int main(int, char** argv)
-{
-  
+{  
   cv::Mat inputImage;
 
   cv::Mat image, imageCopy;
 
-  string imageName("../Images/ArUcoGridLarge3x3rot.png"); // by default
+  string imageName("../Images/ArUcoGridLarge3x3.png"); // by default
   image = cv::imread(imageName.c_str(), cv::IMREAD_COLOR); // Read the file
 
   int dictionaryId = 10; // alias for the DICT_6X6_250 dictionary
@@ -275,7 +290,7 @@ int main(int, char** argv)
   cv::circle(imageCopy, gridCorners.at(3), 10, cv::Scalar(255, 255, 255), CV_FILLED, 8, 0);
   
   int horiz = 3;//21;
-    int vert = 3;//30;
+  int vert = 3;//30;
 
   drawGrid(imageCopy, gridCorners, horiz, vert);
 
